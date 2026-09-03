@@ -89,4 +89,5 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}/${{ env.IMAGE_NAME }}:v${{ matrix.version }}
             ghcr.io/${{ github.repository }}/${{ env.IMAGE_NAME }}:v${{ matrix.version }}-${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}/${{ env.IMAGE_NAME }}:v${{ matrix.version }}-${{ github.ref_name }}-${{ steps.timestamp.outputs.timestamp }}
           outputs: type=image,name=ghcr.io/${{ github.repository }}/${{ env.IMAGE_NAME }},annotation-index.org.opencontainers.image.description=${{ env.IMAGE_NAME }}

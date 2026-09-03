@@ -10,10 +10,10 @@ it handy for integration testing (e.g. the `go-docker-testsuite`).
 The CI builds an image for every released version of the **Squid** and
 **Tentacle** release trains:
 
-| Train    | Versions                                             |
-|----------|------------------------------------------------------|
+| Train    | Versions                                               |
+| -------- | ------------------------------------------------------ |
 | Squid    | 19.2.0, 19.2.1, 19.2.2, 19.2.3, 19.2.4, 19.2.5, 19.2.6 |
-| Tentacle | 20.2.0, 20.2.1, 20.2.2, 20.2.3, 20.2.4               |
+| Tentacle | 20.2.0, 20.2.1, 20.2.2, 20.2.3, 20.2.4                 |
 
 Images are tagged as `v<version>` and published to
 [`ghcr.io/teran/ceph-container`](https://ghcr.io/teran/ceph-container/ceph).
