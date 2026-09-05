@@ -32,6 +32,11 @@ set -euo pipefail
 : "${CEPH_DEMO_SECRET_KEY:?CEPH_DEMO_SECRET_KEY must be set}"
 : "${RGW_FRONTEND_IP:=0.0.0.0}"
 : "${RGW_FRONTEND_PORT:=8080}"
+# This image is for testing only and is not production-ready: SSE-C / S3
+# crypto and TLS verification are disabled by default so tests can exercise
+# them over plain HTTP. Override per-container if needed.
+: "${RGW_CRYPT_REQUIRE_SSL:=false}"
+: "${RGW_VERIFY_SSL:=false}"
 
 CONF=/etc/ceph/${CLUSTER}.conf
 ADMIN_KEYRING=/etc/ceph/${CLUSTER}.client.admin.keyring
@@ -82,6 +87,8 @@ osd data = ${OSD_PATH}
 
 [client.rgw.${RGW_NAME}]
 rgw dns name = ${RGW_NAME}
+rgw crypt require ssl = ${RGW_CRYPT_REQUIRE_SSL}
+rgw verify ssl = ${RGW_VERIFY_SSL}
 rgw frontends = beast endpoint=${RGW_FRONTEND_IP}:${RGW_FRONTEND_PORT}
 EOF
 }
