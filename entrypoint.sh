@@ -58,6 +58,56 @@ CLI_OPTS=(--cluster "$CLUSTER")
 
 log() { echo "$(date '+%F %T')  ceph-demo: $*"; }
 
+# apply_config_overrides appends any CONFIG_<SCOPE>_<SETTING>=<value> env vars
+# to the ceph.conf as their own section blocks. Ceph merges duplicate
+# sections, so appending works even when the section already exists above.
+#
+#   CONFIG_GLOBAL_<setting>  -> [global]
+#   CONFIG_MON_<setting>     -> [mon]
+#   CONFIG_OSD_<setting>     -> [osd]
+#   CONFIG_MGR_<setting>     -> [mgr]
+#   CONFIG_RGW_<setting>     -> [client.rgw.${RGW_NAME}]
+#   CONFIG_CLIENT_<setting>  -> [client]
+#
+# <setting> is lowercased and its underscores become spaces to match the
+# ceph.conf key syntax (e.g. CONFIG_RGW_CRYPT_REQUIRE_SSL -> "crypt require ssl").
+apply_config_overrides() {
+  local conf="$1" var value rest scope setting section
+
+  for var in $(env | grep -E '^CONFIG_' | cut -d= -f1 || true); do
+    value="${!var}"
+    rest="${var#CONFIG_}"
+    scope="${rest%%_*}"
+    setting="${rest#*_}"
+    setting=$(printf '%s' "$setting" | tr '[:upper:]' '[:lower:]' | tr '_' ' ')
+
+    if [ -z "$setting" ]; then
+      log "WARN: CONFIG_ env var $var has no setting; ignoring"
+      continue
+    fi
+
+    case "$scope" in
+      GLOBAL) section="global" ;;
+      MON)    section="mon" ;;
+      OSD)    section="osd" ;;
+      MGR)    section="mgr" ;;
+      RGW)    section="client.rgw.${RGW_NAME}" ;;
+      CLIENT) section="client" ;;
+      *)
+        log "WARN: unknown CONFIG_ scope '$scope' in $var; ignoring"
+        continue
+        ;;
+    esac
+
+    log "applying config override: [$section] $setting = $value"
+    cat >>"$conf" <<EOF
+
+[$section]
+$setting = $value
+EOF
+  done
+}
+
 write_conf() {
   mkdir -p /etc/ceph /var/lib/ceph
   local fsid
@@ -91,6 +141,8 @@ rgw crypt require ssl = ${RGW_CRYPT_REQUIRE_SSL}
 rgw verify ssl = ${RGW_VERIFY_SSL}
 rgw frontends = beast endpoint=${RGW_FRONTEND_IP}:${RGW_FRONTEND_PORT}
 EOF
+
+  apply_config_overrides "$CONF"
 }
 
 bootstrap_mon() {
