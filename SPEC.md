@@ -31,7 +31,14 @@ Required environment (unset values cause the entrypoint to abort):
 * `CEPH_DEMO_SECRET_KEY`
 
 Sensible defaults exist for `CLUSTER`, `MON_NAME`, `MGR_NAME`, `RGW_NAME`,
-`MON_PORT`, `RGW_FRONTEND_IP`, `RGW_FRONTEND_PORT`, `CEPH_DEMO_UID`.
+`RGW_DNS_NAME`, `MON_PORT`, `RGW_FRONTEND_IP`, `RGW_FRONTEND_PORT`,
+`CEPH_DEMO_UID`.
+
+`RGW_DNS_NAME` is `rgw dns name`: the comma-separated host names RGW serves
+(default: `RGW_NAME`). A request whose `Host` is not among them is taken as a
+virtual-hosted bucket named after the host. It is separate from `RGW_NAME`
+because that one also names the `client.rgw.*` entity and its data directory.
+Written into `ceph.conf` on first bootstrap only.
 
 `CEPH_DEMO_CAPS` sets the RGW admin caps of the demo user. Default: every
 RGW cap type with `*` (`users`, `buckets`, `metadata`, `usage`, `info`,

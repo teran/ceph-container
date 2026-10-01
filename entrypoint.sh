@@ -13,6 +13,8 @@
 #   CEPH_DEMO_CAPS                        RGW caps of that user (default: every cap
 #                                         type =*; empty = no caps; first boot only)
 #   RGW_FRONTEND_PORT                     beast port (default 8080)
+#   RGW_DNS_NAME                          host name(s) RGW serves, comma-separated
+#                                         (default: RGW_NAME; first boot only, example: "rgw.local ceph.local")
 #   CLUSTER / MON_NAME / MGR_NAME / RGW_NAME / MON_PORT
 #
 # Buckets are NOT created here: modern Ceph (Reef+) only creates buckets via
@@ -26,6 +28,7 @@ set -euo pipefail
 : "${MON_NAME:=demo}"
 : "${MGR_NAME:=demo}"
 : "${RGW_NAME:=localhost}"
+: "${RGW_DNS_NAME:=${RGW_NAME}}"
 : "${MON_IP:?MON_IP must be set}"
 : "${CEPH_PUBLIC_NETWORK:?CEPH_PUBLIC_NETWORK must be set}"
 : "${MON_PORT:=3300}"
@@ -139,7 +142,7 @@ mon data avail warn = 5
 osd data = ${OSD_PATH}
 
 [client.rgw.${RGW_NAME}]
-rgw dns name = ${RGW_NAME}
+rgw dns name = ${RGW_DNS_NAME}
 rgw crypt require ssl = ${RGW_CRYPT_REQUIRE_SSL}
 rgw verify ssl = ${RGW_VERIFY_SSL}
 rgw frontends = beast endpoint=${RGW_FRONTEND_IP}:${RGW_FRONTEND_PORT}
