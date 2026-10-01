@@ -33,6 +33,14 @@ Required environment (unset values cause the entrypoint to abort):
 Sensible defaults exist for `CLUSTER`, `MON_NAME`, `MGR_NAME`, `RGW_NAME`,
 `MON_PORT`, `RGW_FRONTEND_IP`, `RGW_FRONTEND_PORT`, `CEPH_DEMO_UID`.
 
+`CEPH_DEMO_CAPS` sets the RGW admin caps of the demo user. Default: every
+RGW cap type with `*` (`users`, `buckets`, `metadata`, `usage`, `info`,
+`zone`, `bilog`, `mdlog`, `datalog`, `roles`, `user-policy`, `amz-cache`,
+`oidc-provider`, `user-info-without-keys`, `ratelimit`, `accounts`; all are
+accepted by Squid and Tentacle). An explicitly empty value
+creates the user without caps. Caps are applied only on first bootstrap; a
+restart with existing volumes does not change them.
+
 Readiness signal: the container prints `SUCCESS: RGW on <ip>:<port>, admin
 user <uid>` after mon + mgr + osd + rgw are up and the RGW health check passed.
 

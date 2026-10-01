@@ -10,6 +10,8 @@
 # Environment (same names as the demo image):
 #   MON_IP, CEPH_PUBLIC_NETWORK           mon address and public network (required)
 #   CEPH_DEMO_UID/ACCESS_KEY/SECRET_KEY   RGW admin user (access/secret required)
+#   CEPH_DEMO_CAPS                        RGW caps of that user (default: every cap
+#                                         type =*; empty = no caps; first boot only)
 #   RGW_FRONTEND_PORT                     beast port (default 8080)
 #   CLUSTER / MON_NAME / MGR_NAME / RGW_NAME / MON_PORT
 #
@@ -30,6 +32,7 @@ set -euo pipefail
 : "${CEPH_DEMO_UID:=demo}"
 : "${CEPH_DEMO_ACCESS_KEY:?CEPH_DEMO_ACCESS_KEY must be set}"
 : "${CEPH_DEMO_SECRET_KEY:?CEPH_DEMO_SECRET_KEY must be set}"
+: "${CEPH_DEMO_CAPS=users=*;buckets=*;metadata=*;usage=*;info=*;zone=*;bilog=*;mdlog=*;datalog=*;roles=*;user-policy=*;amz-cache=*;oidc-provider=*;user-info-without-keys=*;ratelimit=*;accounts=*}"
 : "${RGW_FRONTEND_IP:=0.0.0.0}"
 : "${RGW_FRONTEND_PORT:=8080}"
 # This image is for testing only and is not production-ready: SSE-C / S3
@@ -222,8 +225,10 @@ bootstrap_demo_user() {
   radosgw-admin "${CLI_OPTS[@]}" user create --uid="$CEPH_DEMO_UID" \
     --display-name="Ceph demo user" \
     --access-key="$CEPH_DEMO_ACCESS_KEY" --secret-key="$CEPH_DEMO_SECRET_KEY" >/dev/null
-  radosgw-admin "${CLI_OPTS[@]}" caps add --uid="$CEPH_DEMO_UID" \
-    --caps="buckets=*;users=*;usage=*;metadata=*" >/dev/null
+  if [ -n "$CEPH_DEMO_CAPS" ]; then
+    radosgw-admin "${CLI_OPTS[@]}" caps add --uid="$CEPH_DEMO_UID" \
+      --caps="$CEPH_DEMO_CAPS" >/dev/null
+  fi
 }
 
 if [ -e "$MARKER" ]; then

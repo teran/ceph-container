@@ -53,3 +53,9 @@ docker run --rm -p 8080:8080 -p 3300:3300 \
 ```
 
 The container is ready when the logs print `SUCCESS: RGW on ...`.
+
+The demo user gets every RGW admin cap by default (`users=*;buckets=*;...`,
+see `SPEC.md` for the full list). Override them with
+`CEPH_DEMO_CAPS`, e.g. `-e CEPH_DEMO_CAPS="buckets=read"`, or pass an empty
+value (`-e CEPH_DEMO_CAPS=`) for a user without admin caps. Caps are applied
+only when the cluster is bootstrapped, not on restart with existing volumes.
